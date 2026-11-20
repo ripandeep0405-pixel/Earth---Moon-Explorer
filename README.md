@@ -17,6 +17,28 @@ The project combines 3D rendering, texture mapping, geometric transformations, l
 - **Galaxy Background:** Space-themed textured background.
 - **Interactive Controls:** Keyboard navigation, rotation speed adjustments, pause, and resume.
 
+## 📸 Project Gallery
+
+### Geographic Explorer
+
+| North America | South America |
+|:---:|:---:|
+| ![North America](screenshots/NA.png) | ![South America](screenshots/SA.png) |
+
+| Asia | California |
+|:---:|:---:|
+| ![Asia](screenshots/Asia.png) | ![California](screenshots/CA.png) |
+
+### Interactive Menus
+
+| Main Menu | Geographic Menu |
+|:---:|:---:|
+| ![Main Menu](screenshots/Menu1.png) | ![Geographic Menu](screenshots/Menu2.png) |
+
+### 🎬 Earth Rotation Demonstration
+
+[Watch the Earth & Moon Rotation Video](screenshots/Rotationn.mp4)
+
 ## Geographic Explorer
 
 | Location | Highlight |
