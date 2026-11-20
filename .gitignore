@@ -1,0 +1,16 @@
+# Compiled executable
+/project
+
+# Temporary and compiled object files
+*.o
+*.out
+
+# Backup source files
+project_backup.cpp
+
+# Original large texture files
+*_8k.jpg
+earth_daymap_before_highlighting.jpg
+
+# macOS files
+.DS_Store
