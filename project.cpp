@@ -244,7 +244,7 @@ void highlightAsia()
     0.49f, 0.47f, 0.46f, 0.54f, 0.50f,
     0.43f, 0.45f, 0.48f, 0.43f, 0.39f,
     0.39f, 0.33f, 0.26f
-};   
+};
     const int n = sizeof(px) / sizeof(px[0]);
 
     for (int y = 0; y < h; y++) {
@@ -301,32 +301,109 @@ void highlightAfrica()
     for (int i = 0; i < w*h*3; i++)
         highlightData[i] = img[0].data[i];
 
-    // Approximate Africa polygon
+    // Refined Africa polygon
     const int px[] = {
-         932, 1020, 1165, 1195, 1235,
-        1320, 1245, 1210, 1160, 1115,
-        1070, 1040, 1000,  946,  906,
-         913,  935
+         930,  980, 1040, 1100, 1165, 1220, 1270, 1310,
+        1335, 1305, 1275, 1250, 1265, 1245, 1210, 1170,
+        1120, 1070, 1020,  970,  930,  900,  890,  905
     };
 
     const int py[] = {
-        310, 300, 335, 400, 445,
-        500, 545, 635, 685, 728,
-        700, 620, 565, 548, 480,
-        420, 385
+         320,  305,  300,  302,  312,  332,  360,  400,
+         455,  490,  520,  555,  610,  665,  720,  755,
+         770,  740,  690,  620,  545,  455,  380,  330
     };
 
     const int n = sizeof(px) / sizeof(px[0]);
 
-    for (int y = 290; y < 740 && y < h; y++) {
-        for (int x = 900; x < 1330 && x < w; x++) {
+    for (int y = 290; y < 780 && y < h; y++) {
+        for (int x = 880; x < 1360 && x < w; x++) {
 
             bool inside = false;
 
-            // Check if pixel is inside Africa polygon
+            for (int i = 0, j = n - 1; i < n; j = i++) {
+                if ((py[i] > y) != (py[j] > y)) {
+                    float crossX = px[i] +
+                        (float)(y - py[i]) * (px[j] - px[i]) / (py[j] - py[i]);
+                    if (x < crossX)
+                        inside = !inside;
+                }
+            }
+
+            if (!inside)
+                continue;
+
+            int p = (y * w + x) * 3;
+
+            int r = img[0].data[p];
+            int g = img[0].data[p + 1];
+            int b = img[0].data[p + 2];
+
+            // Skip blue ocean
+            if (b > r * 1.2f && b > g * 1.2f)
+                continue;
+
+            // Yellow highlight
+            highlightData[p]   = (unsigned char)(r * 0.15f + 255.0f * 0.85f);
+            highlightData[p+1] = (unsigned char)(g * 0.15f + 255.0f * 0.85f);
+            highlightData[p+2] = (unsigned char)(b * 0.15f);
+        }
+    }
+
+    // Madagascar as separate small ellipse
+    for (int y = 540; y < 690 && y < h; y++) {
+        for (int x = 1285; x < 1355 && x < w; x++) {
+            float dx = (x - 1320) / 24.0f;
+            float dy = (y - 615) / 52.0f;
+            if (dx*dx + dy*dy > 1.0f)
+                continue;
+
+            int p = (y * w + x) * 3;
+
+            int r = img[0].data[p];
+            int g = img[0].data[p + 1];
+            int b = img[0].data[p + 2];
+
+            if (b > r * 1.2f && b > g * 1.2f)
+                continue;
+
+            highlightData[p]   = (unsigned char)(r * 0.15f + 255.0f * 0.85f);
+            highlightData[p+1] = (unsigned char)(g * 0.15f + 255.0f * 0.85f);
+            highlightData[p+2] = (unsigned char)(b * 0.15f);
+        }
+    }
+
+}
+void highlightAustralia()
+{
+    int w = img[0].width;
+    int h = img[0].height;
+
+    // Restore original Earth texture
+    for (int i = 0; i < w*h*3; i++)
+        highlightData[i] = img[0].data[i];
+
+    // Improved Australia polygon (2048x1024 texture)
+    const int px[] = {
+        1650, 1690, 1745, 1805, 1860, 1910, 1930,
+        1920, 1885, 1830, 1770, 1710, 1665, 1635
+    };
+
+    const int py[] = {
+        705, 635, 595, 585, 595, 635, 705,
+        765, 815, 840, 830, 800, 760, 725
+    };
+
+    const int n = sizeof(px) / sizeof(px[0]);
+
+    for (int y = 580; y < 850 && y < h; y++) {
+        for (int x = 1620; x < 1940 && x < w; x++) {
+
+            bool inside = false;
+
+            // Point-in-polygon test
             for (int i = 0, j = n-1; i < n; j = i++) {
                 if ((py[i] > y) != (py[j] > y)) {
-
                     float crossX = px[i] +
                         (float)(y - py[i]) *
                         (px[j] - px[i]) / (py[j] - py[i]);
@@ -345,19 +422,75 @@ void highlightAfrica()
             int g = img[0].data[p+1];
             int b = img[0].data[p+2];
 
-            // Skip blue ocean pixels
+            // Skip strongly blue ocean
             if (b > r*1.2f && b > g*1.2f)
                 continue;
 
-            // Bright yellow highlight
+            // Bright purple highlight
             highlightData[p] =
-                (unsigned char)(r*0.15f + 255.0f*0.85f);
-
+                (unsigned char)(r*0.15f + 180.0f*0.85f);
             highlightData[p+1] =
-                (unsigned char)(g*0.15f + 255.0f*0.85f);
-
+                (unsigned char)(g*0.15f + 40.0f*0.85f);
             highlightData[p+2] =
-                (unsigned char)(b*0.15f);
+                (unsigned char)(b*0.15f + 255.0f*0.85f);
+        }
+    }
+
+    // Extra small pass for Tasmania
+    for (int y = 835; y < 875 && y < h; y++) {
+        for (int x = 1835; x < 1888 && x < w; x++) {
+
+            int p = (y*w + x)*3;
+
+            int r = img[0].data[p];
+            int g = img[0].data[p+1];
+            int b = img[0].data[p+2];
+
+            if (b > r*1.2f && b > g*1.2f)
+                continue;
+
+            highlightData[p] =
+                (unsigned char)(r*0.15f + 180.0f*0.85f);
+            highlightData[p+1] =
+                (unsigned char)(g*0.15f + 40.0f*0.85f);
+            highlightData[p+2] =
+                (unsigned char)(b*0.15f + 255.0f*0.85f);
+        }
+    }
+}
+void highlightAntarctica()
+{
+    int w = img[0].width;
+    int h = img[0].height;
+
+    // Restore original Earth texture
+    for (int i = 0; i < w*h*3; i++)
+        highlightData[i] = img[0].data[i];
+
+    // Approximate Antarctic region near
+    // the bottom of the 2048x1024 world texture
+    for (int y = 860; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+
+            int p = (y*w + x)*3;
+
+            int r = img[0].data[p];
+            int g = img[0].data[p+1];
+            int b = img[0].data[p+2];
+
+            // Select light-colored snow and ice
+            if (r > 150 && g > 150 && b > 150) {
+
+                // Bright icy blue
+                highlightData[p] =
+                    (unsigned char)(r*0.15f + 60.0f*0.85f);
+
+                highlightData[p+1] =
+                    (unsigned char)(g*0.15f + 220.0f*0.85f);
+
+                highlightData[p+2] =
+                    (unsigned char)(b*0.15f + 255.0f*0.85f);
+            }
         }
     }
 }
@@ -672,6 +805,12 @@ int check_keys(XEvent *e)
             else if (g.selectedLocation == 5) {
                 highlightAfrica();
             }
+            else if (g.selectedLocation == 6) {
+                highlightAustralia();
+            }
+            else if (g.selectedLocation == 7) {
+                highlightAntarctica();
+            }
             else {
                 for (int i = 0; i < img[0].width*img[0].height*3; i++)
                     highlightData[i] = img[0].data[i];
@@ -703,6 +842,20 @@ int check_keys(XEvent *e)
             // Focus on Asia
                 g.targetRotation = 360.0f;
                 g.movingToLocation = true;
+            }
+            else if (g.selectedLocation == 5) {
+            // Focus on Africa
+                g.targetRotation = 75.0f;
+                g.movingToLocation = true;
+            }
+            else if (g.selectedLocation == 6) {
+            // Focus on Australia
+                g.targetRotation = 300.0f;
+                g.movingToLocation = true;
+            }
+            else if (g.selectedLocation == 7) {
+            // Focus on Antarctica
+                g.targetRotation = 180.0f;
             }
             else if (g.selectedLocation == 8) {
             // Focus on California
@@ -910,6 +1063,14 @@ else if (g.selectedLocation == 4) {
     // Tilt Earth toward Asia
     glRotatef(35.0f, 1.0f, 0.0f, 0.0f);
 }
+else if (g.selectedLocation == 6) {
+    // Tilt Earth to bring Australia upward
+    glRotatef(-25.0f, 1.0f, 0.0f, 0.0f);
+}
+else if (g.selectedLocation == 7) {
+    // Bring Antarctica into view
+    glRotatef(-85.0f, 1.0f, 0.0f, 0.0f);
+}
 
 // Rotate Earth horizontally
 glRotatef(g.rtri, 0.0f, 1.0f, 0.0f);
@@ -1038,7 +1199,11 @@ if (!g.paused) {
             g.selectedLocation != 1 &&
             g.selectedLocation != 2 &&
             g.selectedLocation != 3 &&
-            g.selectedLocation != 4) {
+            g.selectedLocation != 4 &&
+            g.selectedLocation != 5 &&
+            g.selectedLocation != 6 &&
+            g.selectedLocation != 7 &&
+            g.selectedLocation != 8) {
     g.rtri += 0.2f * g.speed;
         }
     }
